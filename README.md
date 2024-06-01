@@ -1,3 +1,3 @@
-## Data Science Project Template
+## GymMotionMLTracker-AI
 
-You can use this template to structure your Python data science projects. It is based on [Cookie Cutter Data Science](https://drivendata.github.io/cookiecutter-data-science/).
+This repository contains Python scripts to process, visualize, and model accelerometer and gyroscope data, aimed at classifying various barbell exercises and counting repetitions.
