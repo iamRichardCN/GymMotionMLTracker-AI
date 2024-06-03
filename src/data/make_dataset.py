@@ -10,13 +10,16 @@ single_file_Gyr= pd.read_csv('../../data/raw/MetaMotion/A-bench-heavy2-rpe8_Meta
 # List all data in data/raw/MetaMotion
 # --------------------------------------------------------------
 file = glob('../../data/raw/MetaMotion/*.csv')
+
 len(file)
 
 # --------------------------------------------------------------
 # Extract features from filename
 # --------------------------------------------------------------f 
-data_path='../../data/raw/MetaMotion\\'
+data_path = '../../data/raw/MetaMotion\\'
+
 f = file[0]
+g = file[1]
 participant= f.split('-')[0].replace(data_path, '')
 Label= f.split('-')[1]
 category = f.split('-')[2].rstrip('123').rstrip('_MetaWear_2019')
@@ -28,17 +31,31 @@ df[category]=category
 # --------------------------------------------------------------
 # Read all files
 # --------------------------------------------------------------
+file = glob('../../data/raw/MetaMotion/*.csv')
+
 acc_df=pd.DataFrame()
 gyr_df=pd.DataFrame()
 
 acc_set=1
 gyr_set=1
+
 for f in file:
     participant= f.split('-')[0].replace(data_path, '')
     Label= f.split('-')[1]
     category = f.split('-')[2].rstrip('123').rstrip('_MetaWear_2019')
     
-    print(category)
+    df = pd.read_csv(f)
+    
+    # Add metadata as new columns
+    df["participant"] = participant
+    df["Label"] = Label
+    df["category"] = category
+        
+    if "Accelerometer" in f:
+        acc_df=pd.concat([acc_df, df])
+    
+    if "Gyroscope" in f:
+        gyr_df=pd.concat([gyr_df, df])
     
 
 # --------------------------------------------------------------
