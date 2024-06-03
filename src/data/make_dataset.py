@@ -4,22 +4,42 @@ from glob import glob
 # --------------------------------------------------------------
 # Read single CSV file
 # --------------------------------------------------------------
-single_file= pd.read_csv('../../data/raw/MetaMotion/A-bench-heavy2-rpe8_MetaWear_2019-01-11T16.10.08.270_C42732BE255C_Accelerometer_12.500Hz_1.4.4.csv')
-
+single_file_Acc= pd.read_csv('../../data/raw/MetaMotion/A-bench-heavy2-rpe8_MetaWear_2019-01-11T16.10.08.270_C42732BE255C_Accelerometer_12.500Hz_1.4.4.csv')
+single_file_Gyr= pd.read_csv('../../data/raw/MetaMotion/A-bench-heavy2-rpe8_MetaWear_2019-01-11T16.10.08.270_C42732BE255C_Gyroscope_25.000Hz_1.4.4.csv')
 # --------------------------------------------------------------
 # List all data in data/raw/MetaMotion
 # --------------------------------------------------------------
-
+file = glob('../../data/raw/MetaMotion/*.csv')
+len(file)
 
 # --------------------------------------------------------------
 # Extract features from filename
-# --------------------------------------------------------------
+# --------------------------------------------------------------f 
+data_path='../../data/raw/MetaMotion\\'
+f = file[0]
+participant= f.split('-')[0].replace(data_path, '')
+Label= f.split('-')[1]
+category = f.split('-')[2].rstrip('123').rstrip('_MetaWear_2019')
 
-
+df= pd.read_csv(f)
+df[participant]=participant
+df[Label]=Label
+df[category]=category
 # --------------------------------------------------------------
 # Read all files
 # --------------------------------------------------------------
+acc_df=pd.DataFrame()
+gyr_df=pd.DataFrame()
 
+acc_set=1
+gyr_set=1
+for f in file:
+    participant= f.split('-')[0].replace(data_path, '')
+    Label= f.split('-')[1]
+    category = f.split('-')[2].rstrip('123').rstrip('_MetaWear_2019')
+    
+    print(category)
+    
 
 # --------------------------------------------------------------
 # Working with datetimes
