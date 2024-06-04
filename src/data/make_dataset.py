@@ -177,6 +177,22 @@ sampling={
 
 data_merge[:1000].resample(rule="200ms").apply(sampling)
 
+days = [g for n, g in data_merge.groupby(pd.Grouper(freq="D"))]
+
+data_resampled=pd.concat([df.resample(rule="200ms").apply(sampling).dropna() for df in days])
+
+#Here's a breakdown of how the last line works:
+#The variable df represents each DataFrame within the days list, which is a collection of DataFrames grouped by day. In this context, df is used as a placeholder variable to iterate over each DataFrame in the list days.
+#Iterating Over Each DataFrame in days List: The list comprehension iterates over each DataFrame (df) in the days list.
+#Resample and Apply Sampling: For each DataFrame df, it first resamples the data at 200ms intervals using resample(rule="200ms"). Then, it applies the sampling dictionary, which specifies aggregation functions for each column.
+#Drop Missing Values: After applying the sampling, the dropna() method is called to remove any rows containing missing values.
+#Concatenation: The resulting resampled and processed DataFrames for each day are concatenated into a single DataFrame using pd.concat
+
+
+data_resampled.info()
+data_resampled["set"]=data_resampled["set"].astype("int")
+
+data_resampled.info()
 
 # Accelerometer:    12.500HZ
 # Gyroscope:        25.000Hz
@@ -185,3 +201,5 @@ data_merge[:1000].resample(rule="200ms").apply(sampling)
 # --------------------------------------------------------------
 # Export dataset
 # --------------------------------------------------------------
+
+data_resampled.to_pickle("../../data/interim/01_data_processed.pkl")
