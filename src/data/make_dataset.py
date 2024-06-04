@@ -91,17 +91,92 @@ del gyr_df["elapsed (s)"]
 file = glob('../../data/raw/MetaMotion/*.csv')
 data_path = '../../data/raw/MetaMotion\\'
 
-def read_data_from_files(file)
+def read_data_from_files(file):
+    acc_df=pd.DataFrame()
+    gyr_df=pd.DataFrame()
 
+    acc_set=1
+    gyr_set=1
+
+    # Process each file
+    for f in file:
+        participant= f.split('-')[0].replace(data_path, '')
+        Label= f.split('-')[1]
+        category = f.split('-')[2].rstrip('123').rstrip('_MetaWear_2019')
+        
+        df = pd.read_csv(f)
+        
+        # Add metadata as new columns
+        df["participant"] = participant
+        df["Label"] = Label
+        df["category"] = category
+            
+        if "Accelerometer" in f:
+            df["set"]=acc_set
+            acc_set +=1
+            acc_df=pd.concat([acc_df, df])
+        
+        if "Gyroscope" in f:
+            df["set"]=gyr_set
+            gyr_set +=1
+            gyr_df=pd.concat([gyr_df, df])
+    
+    pd.to_datetime(df["epoch (ms)"], unit="ms")
+
+    acc_df.index=pd.to_datetime(acc_df["epoch (ms)"], unit="ms")
+    gyr_df.index=pd.to_datetime(gyr_df["epoch (ms)"], unit="ms")
+
+    del acc_df["epoch (ms)"]
+    del acc_df["time (01:00)"]
+    del acc_df["elapsed (s)"]
+
+    del gyr_df["epoch (ms)"]
+    del gyr_df["time (01:00)"]
+    del gyr_df["elapsed (s)"]
+    
+    return  acc_df, gyr_df
+
+acc_df, gyr_df=read_data_from_files(file)
 
 # --------------------------------------------------------------
 # Merging datasets
 # --------------------------------------------------------------
+data_merge= pd.concat([acc_df.iloc[:,:3], gyr_df], axis=1)
+#rename the columns for ease
+data_merge.columns= [
+    "Acc_x",
+    "Acc_y",
+    "Acc_z",
+    "Gyr_x",
+    "Gyr_y",
+    "Gyr_z",
+    "participant",
+    "Label",
+    "category",
+    "set"    
+]
 
+
+data_merge
 
 # --------------------------------------------------------------
 # Resample data (frequency conversion)
 # --------------------------------------------------------------
+sampling={
+   "Acc_x":"mean",
+    "Acc_y":"mean",
+    "Acc_z":"mean",
+    "Gyr_x":"mean",
+    "Gyr_y":"mean",
+    "Gyr_z":"mean",
+    "participant" :"last",
+    "Label"       :"last",
+    "category"    :"last",
+    "set"         :"last"
+}
+
+data_merge[:1000].resample(rule="200ms").apply(sampling)
+
 
 # Accelerometer:    12.500HZ
 # Gyroscope:        25.000Hz
