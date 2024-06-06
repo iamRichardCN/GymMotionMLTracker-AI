@@ -98,8 +98,40 @@ for label in labels:
 # --------------------------------------------------------------
 # Combine plots in one figure
 # --------------------------------------------------------------
+label = "squat"
+participant = "A"
+combined_plot_df = (
+    df.query(f"Label == '{label}'")
+    .query(f"participant == '{participant}'")
+    .reset_index(drop=True)
+)
 
+fig, ax=plt.subplots(nrows=2,sharex=True, figsize = (20, 10))
+combined_plot_df[["Acc_x","Acc_y","Acc_z"]].plot(ax=ax[0])
+combined_plot_df[["Gyr_x","Gyr_y","Gyr_z"]].plot(ax=ax[1])
+ax[0].legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=3, fancybox=True,shadow=True)
+ax[1].legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=3, fancybox=True,shadow=True)
+ax[1].set_xlabel("samples")
 
 # --------------------------------------------------------------
 # Loop over all combinations and export for both sensors
 # --------------------------------------------------------------
+labels = df["Label"].unique()
+participants = df["participant"].unique()
+
+for label in labels:
+    for participant in participants:
+        combined_plot_df = (
+            df.query(f"Label == '{label}'")
+            .query(f"participant == '{participant}'")
+            .reset_index(drop=True)
+        )
+        if len(combined_plot_df)>0: 
+            fig, ax=plt.subplots(nrows=2,sharex=True, figsize = (20, 10))
+            combined_plot_df[["Acc_x","Acc_y","Acc_z"]].plot(ax=ax[0])
+            combined_plot_df[["Gyr_x","Gyr_y","Gyr_z"]].plot(ax=ax[1])
+            ax[0].legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=3, fancybox=True,shadow=True)
+            ax[1].legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=3, fancybox=True,shadow=True)
+            ax[1].set_xlabel("samples")
+            plt.savefig(f"../../reports/figures/{label.title()} ({participant}).png")
+            plt.show()
