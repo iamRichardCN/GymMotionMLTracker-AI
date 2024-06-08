@@ -133,6 +133,8 @@ df[outlier_columns[:3] + ["Label"]].plot.hist(by="Label", figsize=(20, 20), layo
 df[outlier_columns[3:] + ["Label"]].plot.hist(by="Label", figsize=(20, 20), layout=(3,3))
 plt.show()
 
+# Insert Chauvenet's function
+
 def mark_outliers_chauvenet(dataset, col, C=2):
     """Finds outliers in the specified column of datatable and adds a binary column with
     the same name extended with '_outlier' that expresses the result per data point.
@@ -178,10 +180,13 @@ def mark_outliers_chauvenet(dataset, col, C=2):
     return dataset
 
 
-# Insert Chauvenet's function
+
 
 
 # Loop over all columns
+for col in outlier_columns:
+    dataset=mark_outliers_chauvenet(df, col)
+    plot_binary_outliers(dataset=dataset, col=col, outlier_col=col+"_outlier", reset_index=True)
 
 
 # --------------------------------------------------------------
@@ -189,25 +194,93 @@ def mark_outliers_chauvenet(dataset, col, C=2):
 # --------------------------------------------------------------
 
 # Insert LOF function
+def mark_outliers_lof(dataset, columns, n=20):
+    """Mark values as outliers using LOF
 
+    Args:
+        dataset (pd.DataFrame): The dataset
+        col (string): The column you want apply outlier detection to
+        n (int, optional): n_neighbors. Defaults to 20.
+    
+    Returns:
+        pd.DataFrame: The original dataframe with an extra boolean column
+        indicating whether the value is an outlier or not.
+    """
+    
+    dataset = dataset.copy()
+
+    lof = LocalOutlierFactor(n_neighbors=n)
+    data = dataset[columns]
+    outliers = lof.fit_predict(data)
+    X_scores = lof.negative_outlier_factor_
+
+    dataset["outlier_lof"] = outliers == -1
+    return dataset, outliers, X_scores
 
 # Loop over all columns
+dataset, outliers, X_scores = mark_outliers_lof(df, outlier_columns)
+
+for col in outlier_columns:
+    plot_binary_outliers(dataset=dataset, col=col, outlier_col="outlier_lof", reset_index=True)
 
 
 # --------------------------------------------------------------
 # Check outliers grouped by label
 # --------------------------------------------------------------
+label="squat"
+
+for col in outlier_columns:
+    dataset=mark_outliers_iqr(df[df["Label"]== label], col)
+    plot_binary_outliers(dataset=dataset, col=col, outlier_col=col+"_outlier", reset_index=True)
+#IQR too strict
+
+for col in outlier_columns:
+    dataset=mark_outliers_chauvenet(df[df["Label"]== label], col)
+    plot_binary_outliers(dataset=dataset, col=col, outlier_col=col+"_outlier", reset_index=True)
+#chauvenet is better
+
+dataset, outliers, X_scores = mark_outliers_lof(df[df["Label"]== label], outlier_columns)
+for col in outlier_columns:
+    plot_binary_outliers(dataset=dataset, col=col, outlier_col="outlier_lof", reset_index=True)
+
+
+
 
 
 # --------------------------------------------------------------
 # Choose method and deal with outliers
 # --------------------------------------------------------------
 
-# Test on single column
 
+# Test on single column
+col="Gyr_y"
+dataset=mark_outliers_chauvenet(df, col)
+dataset[dataset["Gyr_y_outlier"]]
+dataset.loc[dataset["Gyr_y_outlier"], "Gyr_y"]=np.nan
 
 # Create a loop
+outlier_removed_df=df.copy()
+for col in outlier_columns:
+    for label in df["Label"].unique():
+        dataset=mark_outliers_chauvenet(df[df["Label"]== label], col)
+        
+        #replaced outlier values with nan
+        dataset.loc[dataset[col+"_outlier"],col] = np.nan
+        
+        #update the original values in the original df
+        outlier_removed_df.loc[(outlier_removed_df["Label"]== label), col]=dataset[col]
+       
+       # Calculate the number of outliers removed
+        n_outliers = dataset[col + "_outlier"].sum()
+        print(f"Removed {n_outliers} outliers from {col} for label {label}")
+       
+        n_outliers=len(df)-len(outlier_removed_df[col].dropna())
+        print(f"Removed {n_outliers} from {col} for {label}")
+
+
+outlier_removed_df.info()
 
 # --------------------------------------------------------------
 # Export new dataframe
 # --------------------------------------------------------------
+outlier_removed_df.to_pickle("../../data/interim/02_outlier_removed_chauvenet.pkl")
