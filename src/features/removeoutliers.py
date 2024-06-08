@@ -107,9 +107,14 @@ def mark_outliers_iqr(dataset, col):
 
     return dataset
 # Plot a single column
+col="Acc_x"
+dataset=mark_outliers_iqr(df, col)
+plot_binary_outliers(dataset=dataset, col=col, outlier_col=col+"_outlier", reset_index=True)
 
 
+#
 # Loop over all columns
+
 
 
 # --------------------------------------------------------------
