@@ -35,15 +35,28 @@ for s in df['set'].unique():
     Start= duration=df[df['set']==s].index[-1]
     stop= df[df['set']==s].index[0]
     duration = Start- stop
-    
+    df.loc[(df['set']==s), "duration"] = duration.seconds
 
-    
+
+df.tail()
+
+duration_df= df.groupby(["category"])['duration'].mean()
+
+duration_df.iloc[0]/5
+duration_df.iloc[1]/10
+
+
+
 
 # --------------------------------------------------------------
 # Butterworth lowpass filter
 # --------------------------------------------------------------
+df_lowpass=df.copy()
+LowPass=LowPassFilter()
+fs=1000/200
+cutoff=1
 
-
+df_lowpass = LowPass.low_pass_filter(df_lowpass,'Acc_y',fs,cutoff, order=5)
 # --------------------------------------------------------------
 # Principal component analysis PCA
 # --------------------------------------------------------------
