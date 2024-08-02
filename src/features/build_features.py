@@ -48,15 +48,26 @@ duration_df.iloc[1]/10
 
 
 
+
 # --------------------------------------------------------------
 # Butterworth lowpass filter
 # --------------------------------------------------------------
 df_lowpass=df.copy()
 LowPass=LowPassFilter()
 fs=1000/200
-cutoff=1
+cutoff=1.2
 
 df_lowpass = LowPass.low_pass_filter(df_lowpass,'Acc_y',fs,cutoff, order=5)
+
+subset = df_lowpass[df_lowpass['set']==45]
+print(subset["Label"][0])
+
+for col in predictor_columns:
+    df_lowpass=LowPass.low_pass_filter(df_lowpass,'Acc_y',fs,cutoff, order=5)
+    
+   
+
+
 # --------------------------------------------------------------
 # Principal component analysis PCA
 # --------------------------------------------------------------
