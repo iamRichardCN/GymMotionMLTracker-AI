@@ -51,6 +51,8 @@ duration_df.iloc[1]/10
 
 # --------------------------------------------------------------
 # Butterworth lowpass filter
+#stopping to go do another project
+#https://www.youtube.com/watch?v=N2Z8MEsxRpg&list=PL-Y17yukoyy0sT2hoSQxn1TdV0J7-MX4K&index=7
 # --------------------------------------------------------------
 df_lowpass=df.copy()
 LowPass=LowPassFilter()
